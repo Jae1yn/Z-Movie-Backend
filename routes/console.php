@@ -15,5 +15,6 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
+    $a = password_hash('admin', PASSWORD_DEFAULT);
+    dd($a);
 })->purpose('Display an inspiring quote');

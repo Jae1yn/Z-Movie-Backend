@@ -4,20 +4,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel-app
+    container_name: z-movie-app
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
     networks:
-      - laravel-network
+      - z-movie-network
     depends_on:
       - mysql
 
   # Nginx 服务
   webserver:
     image: nginx:alpine
-    container_name: laravel-webserver
+    container_name: z-movie-webserver
     restart: unless-stopped
     ports:
       - "8000:80"
@@ -25,31 +25,41 @@ services:
       - ./:/var/www/html
       - ./docker/nginx:/etc/nginx/conf.d
     networks:
-      - laravel-network
+      - z-movie-network
     depends_on:
       - app
 
   # MySQL 服务
   mysql:
     image: mysql:8.0
-    container_name: laravel-mysql
+    container_name: z-movie-mysql
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: z-movie
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
-      - laravel-network
+      - z-movie-network
     ports:
       - "3307:3306"
+
+  # Redis 服务
+  redis:
+    image: redis:alpine
+    container_name: z-movie-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - z-movie-network
 
 volumes:
   mysql-data:
     driver: local
 
 networks:
-  laravel-network:
+  z-movie-network:
     driver: bridge

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Exception;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 /**
  * 工具类
@@ -35,10 +36,9 @@ class Util
      */
     public static function tokenDecode($token)
     {
-        $publicKey = file_get_contents(resource_path('crt/public.pem'));
-
         try {
-            $decoded = JWT::decode($token, $publicKey, ['RS256']);
+            $publicKey = file_get_contents(resource_path('crt/public.pem'));
+            $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
             return (array) $decoded;
         } catch (Exception $e) {
             return '';
