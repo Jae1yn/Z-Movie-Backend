@@ -9,21 +9,21 @@ use Firebase\JWT\Key;
 /**
  * 工具类
  */
-class Util
-{
+class Util {
 
     /**
      * NOTES : 生成token
+     *
      * @param $arr
+     *
      * @return string
      */
-    public static function tokenEncode($arr)
-    {
-        $privateKey = file_get_contents(resource_path('crt/private.pem'));
+    public static function tokenEncode($arr, $privateKeyPath = 'crt/user/private.pem') {
+        $privateKey = file_get_contents(resource_path($privateKeyPath));
 
         $token = [
- 			'exp' => time() + env('TOKEN_EXPIRE_TIME', 30*24*60*60), //过期时间,这里设置30天
-            'data' => $arr //自定义信息，不要定义敏感信息
+            'exp' => time() + env('TOKEN_EXPIRE_TIME', 30 * 24 * 60 * 60), //过期时间,这里设置30天
+            'data' => $arr, //自定义信息，不要定义敏感信息
         ];
 
         return JWT::encode($token, $privateKey, 'RS256');
@@ -31,16 +31,18 @@ class Util
 
     /**
      * NOTES : 解密token
+     *
      * @param $token
+     *
      * @return array|string
      */
-    public static function tokenDecode($token)
-    {
+    public static function tokenDecode($token, $publicKeyPath = 'crt/user/public.pem') {
         try {
-            $publicKey = file_get_contents(resource_path('crt/public.pem'));
+            $publicKey = file_get_contents(resource_path($publicKeyPath));
             $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
-            return (array) $decoded;
-        } catch (Exception $e) {
+            return (array)$decoded;
+        }
+        catch (Exception $e) {
             return '';
         }
     }

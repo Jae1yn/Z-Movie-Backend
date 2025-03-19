@@ -10,7 +10,7 @@ use App\Support\Util;
 use Closure;
 use Illuminate\Support\Str;
 
-class Login {
+class Admin {
     use TokenTrait;
 
     /**
@@ -33,7 +33,7 @@ class Login {
         }
 
         // decode token
-        $info = Util::tokenDecode($token);
+        $info = Util::tokenDecode($token, 'crt/admin/public.pem');
         if (empty($info)) {
             return codeRender(Code::AUTH_TOKEN_EMPTY_ERROR);
         }
@@ -49,12 +49,12 @@ class Login {
             return codeRender(Code::AUTH_TOKEN_EXPIRE_ERROR);
         }
 
-        $user = User::findOrFail($data['id']);
-        if (!$user) {
+        $admin = Admin::findOrFail($data['id']);;
+        if (!$admin) {
             return codeRender(Code::AUTH_TOKEN_EXPIRE_ERROR);
         }
 
-        app()->instance(Constants::USER_LOGIN, $data);
+        app()->instance(Constants::ADMIN_LOGIN, $data);
         return $next($request);
     }
 

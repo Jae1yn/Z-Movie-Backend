@@ -1,34 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Common\Code;
 use App\Common\Constants;
 use App\Exceptions\CodeException;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\RegisterRequest;
-use App\Http\Requests\User\ChangePasswordRequest;
-use App\Http\Requests\User\UpdateRequest;
+use App\Http\Requests\Admin\ChangePasswordRequest;
+use App\Http\Requests\Admin\UpdateRequest;
 use App\Http\Traits\TokenTrait;
-use App\Repositories\UserRepository;
+use App\Repositories\AdminRepository;
 use Illuminate\Support\Facades\Log;
 
-class UserController extends Controller {
+class AdminController extends Controller {
 
     use TokenTrait;
 
     protected $repository;
 
-    public function __construct(UserRepository $repository) {
+    public function __construct(AdminRepository $repository) {
         $this->repository = $repository;
-    }
-
-    public function register(RegisterRequest $request) {
-        $params = $this->filter($request);
-        $params['password'] = password_hash($params['password'], PASSWORD_DEFAULT);
-        $this->repository->create($params);
-
-        return codeRender(Code::OK);
     }
 
     /**
@@ -41,7 +32,7 @@ class UserController extends Controller {
      */
     public function update(UpdateRequest $request) {
         $params = $this->filter($request);
-        $id = app(Constants::USER_LOGIN)['id'];
+        $id = app(Constants::ADMIN_LOGIN)['id'];
         try {
             $res = $this->repository->update($params, 1);
         } catch (\Exception $e) {
@@ -65,7 +56,7 @@ class UserController extends Controller {
     public function changePassword(ChangePasswordRequest $request) {
         $params = $this->filter($request);
 
-        $id = app(Constants::USER_LOGIN)['id'];
+        $id = app(Constants::ADMIN_LOGIN)['id'];
         $user = $this->repository->find($id)->toArray();
         if (!$user) {
             throw new CodeException(Code::CHECK_OPERATE_ERROR);
@@ -81,10 +72,9 @@ class UserController extends Controller {
             Log::error($e->getMessage());
             return codeRender(Code::DB_ERROR);
         }
-        $this->logoutById(app(Constants::USER_LOGIN)['id']);
+        $this->logoutById(app(Constants::ADMIN_LOGIN)['id']);
 
         return codeRender(Code::OK);
-
     }
 
     /**
@@ -102,5 +92,4 @@ class UserController extends Controller {
         }
 
     }
-
 }
