@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Common\Code;
 use App\Common\Constants;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\LoginRequest;
+use App\Http\Requests\Admin\LoginRequest;
 use App\Http\Traits\TokenTrait;
-use App\Repositories\UserRepository;
+use App\Repositories\AdminRepository;
 use App\Support\Util;
 use Illuminate\Support\Arr;
 
@@ -15,9 +15,11 @@ class LoginController extends Controller {
 
     use TokenTrait;
 
-    protected $repository;
+    const TOKEN_PRIVATE_KEY_PATH = 'crt/admin/private.pem';
 
-    public function __construct(UserRepository $repository) {
+    protected AdminRepository $repository;
+
+    public function __construct(AdminRepository $repository) {
         $this->repository = $repository;
     }
 
@@ -32,21 +34,21 @@ class LoginController extends Controller {
         $data = $this->filter($request);
         $password = Arr::get($data, 'password');
         $account = Arr::get($data, 'account');
-        $user = $this->repository->getAccount($account, ['id', 'name', 'email', 'password']);
-        if (empty($user)) {
+        $info = $this->repository->getAccount($account, ['id', 'name', 'email', 'password']);
+        if (empty($info)) {
             return codeRender(Code::LOGIN_ACCOUNT_PWD_ERROR);
         }
 
-        if (!blank($password) && !password_verify($password, $user['password'])) {
+        if (!blank($password) && !password_verify($password, $info['password'])) {
             return codeRender(Code::LOGIN_ACCOUNT_PWD_ERROR);
         }
 
-        unset($user['password']);
-        $token = Util::tokenEncode($user);
-        $this->delToken($user['email']);
-        $this->setToken($user['email'], $token);
-        $user['token'] = $token;
-        return codeRender(Code::OK, $user);
+        unset($info['password']);
+        $token = Util::tokenEncode($info, self::TOKEN_PRIVATE_KEY_PATH);
+        $this->delToken($info['email']);
+        $this->setToken($info['email'], $token);
+        $info['token'] = $token;
+        return codeRender(Code::OK, $info);
     }
 
     /**
@@ -55,7 +57,7 @@ class LoginController extends Controller {
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|\Illuminate\Http\Response
      */
     public function logout() {
-        $email = app(Constants::USER_LOGIN)['email'];
+        $email = app(Constants::ADMIN_LOGIN)['email'];
         $this->delToken($email);
 
         return codeRender(Code::OK);

@@ -8,7 +8,9 @@ class Constants {
 
     const BASE_BEARER = 'Bearer';
 
-    const LOGIN = 'userInfo';
+    const ADMIN_LOGIN = 'admin';
+
+    const USER_LOGIN = 'user';
 
     const ACCESS_SOURCE = 'access_source';
 

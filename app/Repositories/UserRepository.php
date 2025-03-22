@@ -11,13 +11,10 @@ class UserRepository extends BaseRepository {
         return User::class;
     }
 
-    public function detail($param, $column = ['*']) {
-        if (empty($param)) {
-            return [];
-        }
-        $this->applyConditions($param);
-        $res = $this->first($column);
-        return empty($res) ? [] : $res->toArray();
+    public function getAccount($account, $column = ['*']) {
+        return $this->model->select($column)->where(function ($q) use ($account) {
+            $q->where('name', '=', $account)->orWhere('email', '=', $account);
+        })->first()->toArray();
     }
 
 }
